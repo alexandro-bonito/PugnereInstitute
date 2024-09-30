@@ -1,0 +1,21 @@
+<!-- create_employee.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un employé</title>
+</head>
+<body>
+    <h2>Créer un employé</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="nom_employe">Nom de l'employé:</label>
+        <input type="text" id="nom_employe" name="nom_employe"><br><br>
+        <label for="numero_employe">Numéro de l'employé:</label>
+        <input type="text" id="numero_employe" name="numero_employe"><br><br>
+        <label for="mot_de_passe_employe">Mot de passe de l'employé:</label>
+        <input type="password" id="mot_de_passe_employe" name="mot_de_passe_employe"><br><br>
+        <button type="submit">Créer</button>
+    </form>
+</body>
+</html>

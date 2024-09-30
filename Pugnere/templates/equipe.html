@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Équipe</title>
+    <style>
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --blue: #682783;
+            --light-blue: #CFE8FF;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #F07F15;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+
+        body {
+            font-family: var(--poppins);
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--blue);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-family: var(--lato);
+        }
+
+        th, td {
+            padding: 1rem;
+            border: 1px solid var(--grey);
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--light-blue);
+            color: var(--dark);
+        }
+
+        td img {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+        }
+
+        a {
+            text-decoration: none;
+            font-family: var(--lato);
+            color: var(--orange);
+            display: inline-block;
+            margin-top: 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--orange);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: var(--orange);
+            color: white;
+        }
+
+        button {
+            background-color: var(--orange);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-family: var(--lato);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--red);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Styles pour le lien "Ajouter un Employé" */
+.add-employe-link {
+    display: inline-block;        /* Permet de gérer les marges */
+    padding: 10px 15px;         /* Ajoute de l'espace autour du texte */
+    font-size: 16px;            /* Taille de police */
+    color: #fff;                /* Couleur du texte */
+    background-color: #4CAF50;  /* Couleur de fond */
+    border-radius: 5px;         /* Coins arrondis */
+    text-decoration: none;       /* Supprime le soulignement */
+    transition: background-color 0.3s; /* Effet de transition */
+    margin-bottom: 50px;
+}
+
+/* Change la couleur de fond au survol */
+.add-employe-link:hover {
+    background-color: #45a049; /* Couleur plus foncée au survol */
+}
+
+/* Change la couleur de fond au focus */
+.add-employe-link:focus {
+    outline: none; /* Supprime le contour par défaut */
+    box-shadow: 0 0 5px rgba(72, 201, 76, 0.5); /* Ombre au focus */
+}
+
+    </style>
+</head>
+<body>
+
+    <h1>Équipe - Gestion des Habilitations</h1>
+    <a href="{% url 'Pugnere:add_employe' %}">Ajouter un Employé</a>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- Tableau des employés et leurs habilitations -->
+    <table>
+        <thead>
+            <tr>
+                <th>Photo</th>
+                <th>Nom</th>
+                <th>Boutique</th>
+                <th>Numéro</th>
+                <th>Habilitations</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employe in employes %}
+            <tr>
+                <td>
+                    {% if employe.photo_de_profile %}
+                        <img src="{{ employe.photo_de_profile.url }}" alt="Photo de {{ employe.nom_employe }}">
+                    {% else %}
+                        <img src="{% static 'logo.jpg' %}" alt="Photo par défaut">
+                    {% endif %}
+                </td>
+                <td>{{ employe.nom_employe }}</td>
+                <td>Boutique {{ employe.boutique_index }}</td>
+                <td>{{ employe.numero_employe }}</td>
+                <td>
+                    <form method="POST" action="{% url 'Pugnere:mettre_a_jour_habilitation' employe.id %}">
+                        {% csrf_token %}
+                        
+                        <label>
+                            <input type="checkbox" name="peut_creer_produit" {% if employe.user.habilitation.peut_creer_produit %}checked{% endif %}>
+                            Peut créer produit
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_creer_service" {% if employe.user.habilitation.peut_creer_service %}checked{% endif %}>
+                            Peut créer service
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_enregistrer_vente" {% if employe.user.habilitation.peut_enregistrer_vente %}checked{% endif %}>
+                            Peut enregistrer vente
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_enregistrer_depense" {% if employe.user.habilitation.peut_enregistrer_depense %}checked{% endif %}>
+                            Peut enregistrer dépense
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_creer_facture" {% if employe.user.habilitation.peut_creer_facture %}checked{% endif %}>
+                            Peut créer facture
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_telecharger_pdf" {% if employe.user.habilitation.peut_telecharger_pdf %}checked{% endif %}>
+                            Peut télécharger PDF
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" name="peut_consulter_bilan" {% if employe.user.habilitation.peut_consulter_bilan %}checked{% endif %}>
+                            Peut consulter bilan
+                        </label>
+
+                        <button type="submit">Mettre à jour</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Paiements de Salaires</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Employé</th>
+                <th>Montant</th>
+                <th>Date de paiement</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for salaire in salaires_payes %}
+            <tr>
+                <td>{{ salaire.employe.nom_employe }}</td>
+                <td>{{ salaire.montant }}</td>
+                <td>{{ salaire.date_paiement }}</td>
+                <td>
+                    <form method="POST" action=""> <!-- Mettre à jour l'URL de paiement -->
+                        <input type="hidden" name="employe_id" value="">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</body>
+
+
+</html>

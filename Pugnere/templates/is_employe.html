@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion Employé</title>
+</head>
+<body>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        <h2>Connexion Employé</h2>
+
+        {% csrf_token %}
+        <label for="numero_employe">Numéro d'employé:</label>
+        <input type="text" id="numero_employe" name="numero_employe" required><br>
+        
+        <label for="mot_de_passe_employe">Mot de passe:</label>
+        <input type="password" id="mot_de_passe_employe" name="mot_de_passe_employe" required><br>
+        
+        <button type="submit">Se connecter</button>
+    </form>
+</body>
+</html>
+
+<style>
+
+    :root {
+        --poppins: 'Poppins', sans-serif;
+        --lato: 'Lato', sans-serif;
+    
+        --light: #F9F9F9;
+        --blue: #682783;
+        --light-blue: #CFE8FF;
+        --grey: #eee;
+        --dark-grey: #AAAAAA;
+        --dark: #342E37;
+        --red: #F07F15;
+        --yellow: #FFCE26;
+        --light-yellow: #FFF2C6;
+        --orange: #FD7238;
+        --light-orange: #FFE0D3;
+    }
+    
+        /* Style pour la page de connexion */
+    body {
+        font-family: var(--poppins);
+        background-color: var(--light);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    
+    form {
+        background-color: var(--light);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: var(--dark);
+    }
+    
+    label {
+        font-weight: 500;
+        color: var(--dark);
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0 20px 0;
+        border: 1px solid var(--grey);
+        border-radius: 5px;
+        background-color: var(--grey);
+        color: var(--dark);
+    }
+    
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--blue);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        background-color: var(--orange);
+    }
+    
+    p {
+        text-align: center;
+        color: var(--red);
+        font-weight: bold;
+    }
+    
+    </style>

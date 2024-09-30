@@ -1,0 +1,292 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilan</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+
+            --light: #F9F9F9;
+            --blue: #682783;
+            --light-blue: #CFE8FF;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #F07F15;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+/* Styles pour le bouton de téléchargement PDF */
+.download-button {
+    position: fixed;            /* Position fixe */
+    bottom: 20px;              /* Positionné à 20px du bas */
+    left: 20px;                /* Positionné à 20px de la gauche */
+    padding: 10px 15px;       /* Ajoute de l'espace autour du texte */
+    font-size: 16px;          /* Taille de police */
+    color: #fff;              /* Couleur du texte */
+    background-color: #007BFF; /* Couleur de fond (bleu) */
+    border-radius: 5px;       /* Coins arrondis */
+    text-decoration: none;     /* Supprime le soulignement */
+    transition: background-color 0.3s; /* Effet de transition */
+    z-index: 1000;            /* S'assure que le bouton soit au-dessus des autres éléments */
+}
+
+/* Change la couleur de fond au survol */
+.download-button:hover {
+    background-color: #0056b3; /* Couleur plus foncée au survol */
+}
+
+/* Change la couleur de fond au focus */
+.download-button:focus {
+    outline: none; /* Supprime le contour par défaut */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Ombre au focus */
+}
+
+
+        body {
+            font-family: var(--poppins);
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: var(--blue);
+        }
+
+        .table-container {
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: var(--light);
+        }
+
+        table, th, td {
+            border: 1px solid var(--grey);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--blue);
+            color: #fff;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--light-blue);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bilan des Ventes, Dépenses et Factures</h1>
+
+    <div class="table-container">
+        <h2>Ventes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, total in ventes_data.items %}
+                <tr>
+                    <td>{{ date }}</td>
+                    <td>{{ total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container">
+        <h2>Dépenses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, montant in depenses_data.items %}
+                <tr>
+                    <td>{{ date }}</td>
+                    <td>{{ montant }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container">
+        <h2>Factures De L'institut</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facture in factures_simples %}
+                <tr>
+                    <td>{{ facture.date_emission|date:"Y-m-d" }}</td>
+                    <td>{{ facture.montant }} F</td>
+                    <td>{{ facture.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+
+    <div class="table-container">
+        <h2>Factures Clients</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facture in factures %}
+                <tr>
+                    <td>{{ facture.date_creation|date:"Y-m-d" }}</td>
+                    <td>{{ facture.client_nom }} {{ facture.client_prenom }}</td>
+                    <td>{{ facture.total }} F</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Graphiques pour les ventes, dépenses et factures -->
+    <div>
+        <canvas id="ventesChart"></canvas>
+        <canvas id="depensesChart"></canvas>
+        <canvas id="facturesChart"></canvas>
+    </div>
+
+    <script>
+        function createChart(ctx, labels, data, label, backgroundColor) {
+            new Chart(ctx, {
+                type: 'bar', // Type du graphique
+                data: {
+                    labels: labels, // Les dates
+                    datasets: [{
+                        label: label, // L'étiquette (ventes, dépenses, factures)
+                        data: data, // Les valeurs totales
+                        backgroundColor: backgroundColor,
+                        borderColor: backgroundColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Graphique des ventes
+        var ventesData = JSON.parse('{{ ventes_data|safe }}');
+        var labelsVentes = Object.keys(ventesData); // Récupère les dates
+        var dataVentes = Object.values(ventesData); // Récupère les totaux
+        var ctxVentes = document.getElementById('ventesChart').getContext('2d');
+        createChart(ctxVentes, labelsVentes, dataVentes, 'Ventes', 'rgba(75, 192, 192, 0.2)');
+
+        // Graphique des dépenses
+        var depensesData = JSON.parse('{{ depenses_data|safe }}');
+        var labelsDepenses = Object.keys(depensesData);
+        var dataDepenses = Object.values(depensesData);
+        var ctxDepenses = document.getElementById('depensesChart').getContext('2d');
+        createChart(ctxDepenses, labelsDepenses, dataDepenses, 'Dépenses', 'rgba(153, 102, 255, 0.2)');
+
+        // Graphique des factures
+        var facturesData = JSON.parse('{{ factures_data|safe }}');
+        var labelsFactures = Object.keys(facturesData);
+        var dataFactures = Object.values(facturesData);
+        var ctxFactures = document.getElementById('facturesChart').getContext('2d');
+        createChart(ctxFactures, labelsFactures, dataFactures, 'Factures', 'rgba(255, 159, 64, 0.2)');
+    </script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    document.getElementById('download-pdf').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+
+        const doc = new jsPDF();
+
+        // Titre du PDF
+        doc.setFontSize(20);
+        doc.text('Bilan des Ventes, Dépenses et Factures', 20, 20);
+
+        // Contenu des tableaux
+        doc.setFontSize(12);
+        doc.text('Ventes:', 20, 40);
+        let ventesData = {{ ventes_data|safe }}; // Récupérer les données de ventes
+        let y = 50;
+        for (let date in ventesData) {
+            doc.text(`${date}: ${ventesData[date]}`, 20, y);
+            y += 10;
+        }
+
+        doc.text('Dépenses:', 20, y);
+        y += 10;
+        let depensesData = {{ depenses_data|safe }}; // Récupérer les données de dépenses
+        for (let date in depensesData) {
+            doc.text(`${date}: ${depensesData[date]}`, 20, y);
+            y += 10;
+        }
+
+        // Ajouter plus de contenu ici...
+
+        // Sauvegarder le PDF
+        doc.save('bilan.pdf');
+    });
+</script>
+
+
+
+<button id="download-pdf" class="download-button">Télécharger en PDF</button>
+
+<script>
+    document.getElementById('download-pdf').addEventListener('click', function() {
+        window.location.href = "{% url 'Pugnere:download_pdf' %}"; // Remplacez par l'URL de votre vue de téléchargement
+    });
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,907 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Boxicons -->
+	<link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<!-- My CSS -->
+	<link rel="stylesheet" href="{% static 'style.css' %}">
+
+	<title>AdminHub</title>
+</head>
+<body>
+	<!-- SIDEBAR -->
+	<section id="sidebar">
+		<a href="#" class="brand">
+			{% if user.is_authenticated and user.entreprise %}
+			<div>
+				<img style="width: 50px; height: 50px; border-radius: 50%;" 
+					 src="{{ user.entreprise.logo.url }}" 
+					 alt="{{ user.entreprise.nom }} Logo" class="logo">
+			</div>
+		{% else %}
+			<img style="width: 50px; height: 50px; border-radius: 50%;" 
+				 src="{% static 'logo.jpg' %}" alt="Logo par défaut" class="logo">
+		{% endif %}			<span class="text" style="margin-left: 10px;">Pugnere</span>
+		</a>
+		<ul class="side-menu top">
+			<ul class="side-menu top">
+				<li class="active" id="admin-menu">
+					<a href="{% url 'Pugnere:index'%}">
+						<i class='bx bxs-dashboard'></i>
+						<span class="text">Admin Acceuil</span>
+					</a>
+				</li>
+				<li>
+					
+					{% if peut_creer_service %}
+					<a href="#" id="boutique">
+						<i class='bx bxs-shopping-bag-alt'></i>
+						<span class="text">Articles/Services</span>
+					</a>
+					{% endif %}
+					<script>
+						document.addEventListener('DOMContentLoaded', function() {
+							// Sélectionner tous les éléments avec l'ID "boutique"
+							const boutiques = document.querySelectorAll('#boutique');
+					
+							// Si plus d'un élément avec cet ID existe, masquer le deuxième
+							if (boutiques.length > 1) {
+								boutiques[1].style.display = 'none';
+							}
+						});
+					</script>
+					
+
+					{% if peut_creer_produit %}
+					<a href="#" id="boutique">
+						<i class='bx bxs-shopping-bag-alt'></i>
+						<span class="text">Articles/Services</span>
+					</a>
+					{% endif %}
+				</li>
+
+				{% if peut_consulter_bilan %}
+				<li>
+					<a href="{% url 'Pugnere:bilan' %}">
+						<i class='bx bxs-doughnut-chart'></i>
+						<span class="text">Statistiques/Bilans</span>
+					</a>
+				</li>
+				{% endif %}
+
+				<li>
+					<a href="{% url 'Pugnere:marketplace' %}">
+						<i class='bx bx-store'></i>
+						<span class="text">Marketplace</span>
+					</a>
+				</li>
+				<li>
+
+					{% if peut_telecharger_pdf %}
+					<a href="{% url 'Pugnere:creer_facture' %}">
+						<i class='bx bx-money'></i>
+						<span class="text">Facturation</span>
+					</a>
+					{% endif %}
+					
+				</li>
+				<li>
+					<a href="{% url 'Pugnere:equipe' %}">
+						<i class='bx bxs-group'></i>
+						<span class="text">Equipe</span>
+					</a>
+				</li>
+				<li>
+					<a href="{% url 'Pugnere:stock_view' %}">
+						<i class='bx bx-line-chart'></i>
+						<span class="text">Stock</span>
+					</a>
+				</li>
+			</ul>
+		</ul>
+		<ul class="side-menu">
+			<li>
+				<a href="{% url 'Pugnere:deconnexion' %}" class="logout">
+					<i class='bx bxs-log-out-circle' ></i>
+					<span class="text">Deconnexion</span>
+				</a>
+			</li>
+		</ul>
+	</section>
+	<!-- SIDEBAR -->
+
+	<!-- CONTENT -->
+	<section id="content">
+		<!-- NAVBAR -->
+		<nav>
+			<i class='bx bx-menu' ></i>
+			<form action="#">
+				<div class="form-input">
+					<input type="search" placeholder="Néceitera une énorme quantité de donnée...">
+					<button type="submit" class="search-btn"><i class='bx bx-search' ></i></button>
+				</div>
+			</form>
+			<input type="checkbox" id="switch-mode" hidden>
+			<label for="switch-mode" class="switch-mode"></label>
+			<a href="#" class="profile">
+				{% if user.is_authenticated %}
+    <img src="{{ user.employe.photo_de_profile.url }}" alt="Profile Photo" style="width: 50px; height: 50px; border-radius: 50%;">
+{% else %}
+    <!-- Aucun contenu à afficher si l'utilisateur n'est pas connecté -->
+{% endif %}
+
+			</a>
+		</nav>
+		<!-- NAVBAR -->
+
+		<!-- MAIN -->
+		<main>
+			<div class="head-title">
+				<div class="left">
+					<h1>Administration</h1>
+					<ul class="breadcrumb">
+						<li>
+							<a href="#">Administration</a>
+						</li>
+						<li><i class='bx bx-chevron-right' ></i></li>
+						<li>
+							<a class="active" href="#">Acceuil</a>
+						</li>
+					</ul>
+				</div>
+				<a href="{% url 'Pugnere:bilan' %}" class="btn-download">
+					<i class='bx bxs-cloud-download' ></i>
+					<span class="text">Livre de Comptes pdf</span>
+				</a>
+			</div>
+
+			<ul class="box-info">
+				<li>
+					<i class='bx bxs-calendar-check' ></i>
+					<span class="text">
+						<h4>{{ nombre_ventes_journee }}</h4>
+						<p>Enregistrements Recents</p>
+					</span>
+				</li>
+				<li>
+					<i class='bx bx-money'></i> <!-- Icône adaptée pour les factures -->
+					<span class="text">
+						<h4>{{ nombre_factures_journee }}</h4>
+						<p>Factures du jour</p>
+					</span>
+				</li>
+				
+				<li>
+					<i class='bx bxs-dollar-circle'></i> <!-- Icône adaptée pour les dépenses -->
+					<span class="text">
+						<h4>{{ nombre_depenses_journee }}</h4>
+						<p>Dépenses du jour</p>
+					</span>
+				</li>
+				
+				<li>
+					<i class='bx bx-wallet' ></i>
+					<span class="text">
+						<h4>{{total_ventes_journee}}<span style="color: #682783; font-size: 10px;">-FCFA</span> </h4>
+						<p>Recettes En cours</p>
+					</span>
+				</li>
+			</ul>
+			<div class="table-data">
+				<div class="order">
+					<div class="head">
+						<h3>Recents</h3>
+						<i class='bx bx-plus' id="enregistrervente"></i>
+						<i class='bx bx-search' ></i>
+						<i class='bx bx-filter' ></i>
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>clients</th>
+								<th>Montant</th>
+								<th>heure/Date</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for vente in ventes %}
+							<tr>
+								<td>
+									{% if vente.image %}
+										<img src="{{ vente.image.url }}" alt="Image du client">
+									{% else %}
+										<img src="{% static 'logo.jpg' %}" alt="">
+									{% endif %}
+
+									<p>{{ vente.client_nom }}</p>
+								</td>
+								<td>{{ vente.total }}<span style="color: #682783; font-size: 8px;">-FCFA</span></td>
+								<td style="color: #fe0909; font-size: 10px;">{{ vente.date }}</td>
+								<td><span class="status completed">payé</span></td>
+							</tr>
+							{% endfor %}
+						</tbody>
+						
+
+					</table>
+				</div>
+
+				{% if peut_enregistrer_depense %}
+				<div class="todo">
+					<div class="head">
+						<h3>Factures et Dépenses</h3>
+						<i class='bx bx-plus' id="enregistrerfacture" style="color: #eb8305; font-weight: bold;"></i>
+						<i class='bx bx-plus' id="enregistrerdepense" style="color: #682783; font-weight: bold;"></i>
+						<i class='bx bx-filter' ></i>
+					</div>
+					<ul class="todo-list">
+						<!-- Affichage des factures -->
+						<li class="not-completed">
+							<h4>Factures Maison</h4>
+						</li>
+						{% for facture in factures %}
+						<li class="{% if facture.status == 'payée' %}completed{% else %}not-completed{% endif %}">
+							<p>Facture de {{ facture.montant }} <span style="color: #682783; font-size: 10px;">-FCFA</span>- émise le ({{ facture.date_emission }})</p>
+							<i class='bx bx-dots-vertical-rounded' ></i>
+						</li>
+						{% empty %}
+						<li class="not-completed">
+							<p>Aucune facture trouvée.</p>
+						</li>
+						{% endfor %}
+						
+						<!-- Affichage des dépenses -->
+						<li class="completed">
+							<h4>Dépenses Maison</h4>
+						</li>
+						{% for depense in depenses %}
+						<li class="{% if depense.status == 'archivé' %}completed{% else %}not-completed{% endif %}">
+							<p>Dépense de {{ depense.montant }} <span style="color: #682783; font-size: 10px;">-FCFA</span>- ({{ depense.date}})</p>
+							<i class='bx bx-dots-vertical-rounded' ></i>
+						</li>
+						{% empty %}
+						<li class="completed">
+							<p>Aucune dépense trouvée.</p>
+						</li>
+						{% endfor %}
+				
+						<!-- Lien pour enregistrer -->
+					</ul>
+				</div>
+				{% endif %}
+
+				<style>
+					.todo {
+					max-height: 400px; /* Limite la hauteur maximale */
+					overflow-y: auto;  /* Ajoute un scroll vertical */
+				}
+
+					/* Barre de défilement personnalisée */
+					.todo::-webkit-scrollbar {
+						width: 8px;
+					}
+
+					.todo::-webkit-scrollbar-thumb {
+						background-color: #888; /* Couleur de la barre de scroll */
+						border-radius: 4px;
+					}
+
+					.todo::-webkit-scrollbar-thumb:hover {
+						background-color: #555; /* Couleur au survol */
+				}
+
+
+
+
+
+				.order {
+					max-height: 400px; /* Limite la hauteur maximale */
+					overflow-y: auto;  /* Ajoute un scroll vertical */
+				}
+
+					/* Barre de défilement personnalisée */
+					.order::-webkit-scrollbar {
+						width: 8px;
+					}
+
+					.order::-webkit-scrollbar-thumb {
+						background-color: #888; /* Couleur de la barre de scroll */
+						border-radius: 4px;
+					}
+
+					.order::-webkit-scrollbar-thumb:hover {
+						background-color: #555; /* Couleur au survol */
+				}
+
+				</style>
+				
+			</div>
+
+			{% if peut_creer_produit %}
+			<div class="container" id="elementboutique">
+				<div class="form-section">
+					<h2>Ajouter un Article</h2>
+					{% if messages %}
+					<ul class="messages" style="color: red; font-weight: bold;">
+						{% for message in messages %}
+							<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+						{% endfor %}
+					</ul>
+					{% endif %}
+					<form method="post" enctype="multipart/form-data" action="{% url 'Pugnere:creer_produit' %}">
+						{% csrf_token %}
+						<label for="nom">Nom du produit:</label>
+						<input type="text" id="nom" name="nom" required>
+			
+						<label for="description">Description:</label>
+						<textarea id="description" name="description"></textarea>
+			
+						<label for="prix">Prix:</label>
+						<input type="number" id="prix" name="prix" step="0.01" required>
+			
+						<label for="product_image">Image:</label>
+						<input type="file" id="product_image" name="product_image">
+			
+						<button type="submit">Ajouter Produit</button>
+					</form>
+				</div>
+				{% endif %}
+				<hr>
+				{% if peut_creer_service %}
+				<div class="form-section">
+					<h2>Ajouter un Service</h2>
+					<form method="post" enctype="multipart/form-data" action="{% url 'Pugnere:creer_service_derive' %}">
+						{% csrf_token %}
+						<label for="nom">Nom du Service:</label>
+						<input type="text" id="nom" name="nom" required>
+			
+						<label for="description">Description:</label>
+						<textarea id="description" name="description"></textarea>
+			
+						<label for="prix">Prix:</label>
+						<input type="number" id="prix" name="prix" step="0.01" required>
+			
+						<label for="sderive_image">Image:</label>
+						<input type="file" id="sderive_image" name="sderive_image">
+			
+						<button type="submit">Ajouter Service</button>
+					</form>
+				</div>
+				{% endif %}
+
+				<div class="products-section">
+					{% if peut_creer_produit %}
+					<h3 style="color: #F07F15;">Articles et Services Disponibles</h3>
+					<div class="product-card">
+						<h2 style="margin: 0; padding: 0;" >Produits</h2>
+						<div class="contain">
+							{% if produits %}
+							{% for produit in produits %}
+								<div class="product-item">
+									<!-- 
+
+									{% if produit.product_image %}
+										<img class="item-img" style="width: 50px; height: 50px; border-radius: 50%;" src="{{ produit.product_image.url }}" alt="Image du produit">
+									{% endif %}
+									-->
+									<h3>{{ produit.nom }}</h3>
+									<p>{{ produit.description }}</p>
+									<p>{{ produit.prix }} <span style="color: green;">fcfa</span></p>
+								</div>
+								<hr>
+							{% endfor %}
+						{% else %}
+							<p>Aucun produit disponible.</p>
+						{% endif %}
+						</div>
+					</div>
+					{% endif %}
+
+
+
+					{% if peut_creer_service %}
+					<div class="product-card">
+						<h2 style="margin: 0; padding: 0;">Services Dérivés</h2>
+						<div class="contain">
+							{% if services_derives %}
+							{% for service in services_derives %}
+								<div class="product-item">
+									<!-- 
+
+									{% if service.sderive_image %}
+										<img style="width: 50px; height: 50px; border-radius: 50%;" src="{{ service.sderive_image.url }}" alt="Image du service dérivé">
+									{% endif %}
+
+									-->
+									<h3>{{ service.nom }}</h3>
+									<p>{{ service.description }}</p>
+									<p>Prix: {{ service.prix }} <span style="color: green;">fcfa</span></p>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p>Aucun service dérivé disponible.</p>
+						{% endif %}
+						</div>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+			<div class="container" id="enregistrerventeform" style="position: relative;">
+				<h2 style="top: 1%; position: absolute; width: 100%;">Enregistrer</h2>
+				<form id="venteForm" action="{% url 'Pugnere:enregistrer_vente' %}" method="post" enctype="multipart/form-data" style="margin-top: 25px;">
+					{% csrf_token %}
+					<label for="clientNom">Nom complet du client:</label>
+					<input type="text" id="clientNom" name="clientNom" required>
+			
+					<label for="prix">Tarif principal:</label>
+					<input type="number" id="prix" name="prix" required>
+			
+					<label for="image">Image</label>
+					<input type="file" id="image" name="image">
+			
+					<div id="produitsDérivés">
+						<h3>Produits dérivés</h3>
+						<div class="produit-list">
+							<select name="produitDérivé">
+								<option value="">Sélectionnez un produit dérivé</option>
+								<!-- Dynamically generate options based on available products -->
+								{% for produit in produits %}
+									<option value="{{ produit.id }}">{{ produit.nom }}</option>
+								{% endfor %}
+							</select>
+							<button type="button" class="ajouter-produit" onclick="ajouterProduit()">+</button>
+						</div>
+					</div>
+			
+					<div id="servicesDérivés">
+						<h3>Services dérivés</h3>
+						<div class="service-list">
+							<select name="serviceDérivé">
+								<option value="">Sélectionnez un service dérivé</option>
+								<!-- Dynamically generate options based on available services -->
+								{% for service in services %}
+									<option value="{{ service.id }}">{{ service.nom }}</option>
+								{% endfor %}
+							</select>
+							<button type="button" class="ajouter-service" onclick="ajouterService()">+</button>
+						</div>
+					</div>
+			
+					<button type="submit">Enregistrer</button>
+				</form>
+			</div>
+
+			<div class="container" id="enregistrerdepenseform" style="position: relative;">
+				<h2 style="top: 1%; position: absolute; width: 100%;">Ajout dépense</h2>
+				<form id="depenseForm" action="{% url 'Pugnere:enregistrer_depense' %}" method="post" enctype="multipart/form-data" style="margin-top: 25px;">
+					{% csrf_token %}
+					<label for="montant">Montant de la dépense:</label>
+					<input type="number" id="montant" name="montant" required>
+					
+					<label for="description">Description:</label>
+					<textarea id="description" name="description" required></textarea>
+					
+					<label for="image">Image</label>
+					<input type="file" id="image" name="image">
+					
+					<button type="submit">Enregistrer</button>
+				</form>
+			</div>
+			<div class="container" id="enregistrerfactureform" style="position: relative;">
+				<h2 style="top: 1%; position: absolute; width: 100%;">Ajout facture</h2>
+				<form id="factureForm" action="{% url 'Pugnere:enregistrer_facture' %}" method="post" enctype="multipart/form-data" style="margin-top: 25px;">
+					{% csrf_token %}
+					<label for="montant">Montant de la facture:</label>
+					<input type="number" id="montant" name="montant" required>
+					
+					<label for="description">Description:</label>
+					<textarea id="description" name="description" required></textarea>
+					
+					<label for="image">Image</label>
+					<input type="file" id="image" name="image">
+					
+					<button type="submit">Enregistrer</button>
+				</form>
+			</div>						
+			
+		</main>
+		<!-- MAIN -->
+	</section>
+	<!-- CONTENT -->
+
+	<script src="{% static 'script.js' %}"></script>
+</body>
+</html>
+<style>
+    :root {
+    --poppins: 'Poppins', sans-serif;
+    --lato: 'Lato', sans-serif;
+    --light: #F9F9F9;
+    --blue: #682783;
+    --light-blue: #CFE8FF;
+    --grey: #eee;
+    --dark-grey: #AAAAAA;
+    --dark: #342E37;
+    --red: #F07F15;
+    --yellow: #FFCE26;
+    --light-yellow: #FFF2C6;
+    --orange: #FD7238;
+    --light-orange: #FFE0D3;
+	--white: var(--light);
+	--white: var(--light);
+
+}
+
+
+.tooltip {
+        display: none;
+        position: absolute;
+        background-color: #333;
+        color: #fff;
+        padding: 5px;
+        border-radius: 3px;
+        font-size: 12px;
+        z-index: 1000;
+    }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--poppins);
+}
+
+h2, h3 {
+    margin-bottom: 20px;
+    color: var(--dark);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    color: var(--dark);
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--dark-grey);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: var(--blue);
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--dark);
+}
+
+.employe-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    border: 1px solid var(--grey);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: var(--light);
+}
+
+.employe-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.employe-details p {
+    margin: 5px 0;
+    color: var(--dark-grey);
+}
+
+.container {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--light);
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: var(--dark);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+label {
+    font-weight: bold;
+    color: var(--dark);
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--dark-grey);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    margin-top: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: var(--blue);
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--dark);
+}
+
+.produit-list, .service-list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ajouter-produit, .ajouter-service {
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: var(--dark-grey);
+    cursor: pointer;
+}
+
+.ajouter-produit:hover, .ajouter-service:hover {
+    color: var(--dark);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background-color: var(--white);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.form-section, .products-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h2 {
+    color: var(--blue);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    color: var(--dark);
+}
+
+input, textarea {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--grey);
+    font-family: var(--lato);
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--blue);
+    color: var(--light);
+    font-family: var(--poppins);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--red);
+}
+
+.products-section {
+    background-color: var(--light-blue);
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.product-card {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-card .contain {
+
+	overflow-y: scroll; 
+	height: 150px;
+}
+
+
+.product-card h3 {
+    color: var(--red);
+}
+
+.product-card p {
+    color: var(--dark-grey);
+}
+
+</style>
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Variables pour enregistrer les ventes
+    const enregistrerVenteMenu = document.getElementById("enregistrervente");
+    const mainContent = document.querySelector("main");
+    const enregistrerVenteForm = document.getElementById("enregistrerventeform");
+
+    // Variables pour enregistrer les dépenses
+    const enregistrerDepenseMenu = document.getElementById("enregistrerdepense");
+    const enregistrerDepenseForm = document.getElementById("enregistrerdepenseform");
+
+    // Variables pour enregistrer les factures
+    const enregistrerFactureMenu = document.getElementById("enregistrerfacture");
+    const enregistrerFactureForm = document.getElementById("enregistrerfactureform");
+
+    // État initial des formulaires
+    enregistrerVenteForm.style.display = "none";
+    enregistrerDepenseForm.style.display = "none";
+    enregistrerFactureForm.style.display = "none";
+
+    // Fonction pour afficher un formulaire spécifique et cacher les autres
+    function afficherFormulaire(formId) {
+        // Cacher tous les éléments enfants de main
+        const children = Array.from(mainContent.children);
+        children.forEach(child => {
+            if (child.id === formId) {
+                child.style.display = "flex";
+            } else {
+                child.style.display = "none";
+            }
+        });
+    }
+
+    // Gestionnaire d'événement pour enregistrer la vente
+    enregistrerVenteMenu.addEventListener("click", function(event) {
+        event.preventDefault(); // Empêche le comportement par défaut du lien
+        afficherFormulaire("enregistrerventeform");
+    });
+
+    // Gestionnaire d'événement pour enregistrer les dépenses
+    enregistrerDepenseMenu.addEventListener("click", function(event) {
+        event.preventDefault(); // Empêche le comportement par défaut du lien
+        afficherFormulaire("enregistrerdepenseform");
+    });
+
+    // Gestionnaire d'événement pour enregistrer les factures
+    enregistrerFactureMenu.addEventListener("click", function(event) {
+        event.preventDefault(); // Empêche le comportement par défaut du lien
+        afficherFormulaire("enregistrerfactureform");
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+	document.addEventListener("DOMContentLoaded", function() {
+    const boutiqueMenu = document.getElementById("boutique");
+    const mainContent = document.querySelector("main");
+    const boutiqueSection = document.getElementById("elementboutique");
+
+    // Initial state
+    boutiqueSection.style.display = "none";
+
+    boutiqueMenu.addEventListener("click", function(event) {
+        event.preventDefault(); // Empêche le comportement par défaut du lien
+
+        // Cacher tous les éléments enfants de main sauf boutiqueSection
+        const children = Array.from(mainContent.children);
+        children.forEach(child => {
+            if (child !== boutiqueSection) {
+                child.style.display = "none";
+            }
+        });
+
+        // Afficher la section de la boutique
+        boutiqueSection.style.display = "flex";
+    });
+});
+
+function ajouterProduit() {
+    const produitList = document.querySelector('.produit-list');
+    const newProduitSelect = document.createElement('select');
+    newProduitSelect.name = 'produitDérivé';
+    
+    // Copy options from the first select element
+    const firstSelect = produitList.querySelector('select');
+    newProduitSelect.innerHTML = firstSelect.innerHTML;
+    
+    produitList.appendChild(newProduitSelect);
+}
+
+function ajouterService() {
+    const serviceList = document.querySelector('.service-list');
+    const newServiceSelect = document.createElement('select');
+    newServiceSelect.name = 'serviceDérivé';
+    
+    // Copy options from the first select element
+    const firstSelect = serviceList.querySelector('select');
+    newServiceSelect.innerHTML = firstSelect.innerHTML;
+    
+    serviceList.appendChild(newServiceSelect);
+}
+</script>

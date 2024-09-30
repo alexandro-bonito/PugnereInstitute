@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des stocks</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+
+            --light: #F9F9F9;
+            --blue: #682783;
+            --light-blue: #CFE8FF;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #F07F15;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+
+        body {
+            font-family: var(--poppins);
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: var(--blue);
+        }
+
+        .table-container {
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: var(--light);
+        }
+
+        table, th, td {
+            border: 1px solid var(--grey);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--blue);
+            color: #fff;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--light-blue);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+
+<style>
+
+    :root {
+        --poppins: 'Poppins', sans-serif;
+        --lato: 'Lato', sans-serif;
+    
+        --light: #F9F9F9;
+        --blue: #682783;
+        --light-blue: #CFE8FF;
+        --grey: #eee;
+        --dark-grey: #AAAAAA;
+        --dark: #342E37;
+        --red: #F07F15;
+        --yellow: #FFCE26;
+        --light-yellow: #FFF2C6;
+        --orange: #FD7238;
+        --light-orange: #FFE0D3;
+    }
+    
+
+    
+    form {
+        background-color: var(--light);
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 1200px;
+    }
+    
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: var(--dark);
+    }
+    
+    label {
+        font-weight: 500;
+        color: var(--dark);
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid var(--grey);
+        border-radius: 5px;
+        background-color: var(--grey);
+        color: var(--dark);
+        font-size: 16px;
+    }
+    
+    textarea {
+        resize: vertical;
+        height: 100px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--blue);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    button:hover {
+        background-color: var(--orange);
+    }
+    
+    p {
+        text-align: center;
+        color: var(--red);
+        font-weight: bold;
+    }
+    
+    </style>
+</head>
+<body>
+    <h1>Gestion des Stocks</h1>
+
+    <form method="POST" id="stock-form">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Quantité en Cours</th>
+                    <th>Quantité Vendue</th>
+                    <th>Quantité Restante</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{ stock.produit.nom }}</td>
+                    <td>
+                        <input type="number" name="quantite_en_cours_{{ stock.produit.id }}" value="{{ stock.quantite_en_cours }}" placeholder="Modifier la quantité en cours">
+                    </td>
+                    <td>
+                        <input type="number" name="quantite_vendue_{{ stock.produit.id }}" placeholder="Saisir quantité vendue">
+                    </td>
+                    <td>{{ stock.quantite_restant }}</td>
+                    <td>
+                        <button type="button" class="update-btn" data-produit-id="{{ stock.produit.id }}">Mettre à jour</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+
+    <h1 style="color: red;">Désactivé pour 72 premières heures</h1>
+    
+   
+   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const updateButtons = document.querySelectorAll('.update-btn');
+    updateButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const produitId = this.dataset.produitId;
+            const quantiteEnCours = document.querySelector(`input[name="quantite_en_cours_${produitId}"]`).value;
+            const quantiteVendue = document.querySelector(`input[name="quantite_vendue_${produitId}"]`).value;
+
+            // Debugging: Affiche les valeurs dans la console
+            console.log(`Produit ID: ${produitId}, Quantité en cours: ${quantiteEnCours}, Quantité vendue: ${quantiteVendue}`);
+
+            const formData = new FormData();
+            formData.append('produit_id', produitId);
+            formData.append('quantite_en_cours', quantiteEnCours);
+            formData.append('quantite_vendue', quantiteVendue);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            // Envoie de la requête AJAX
+            fetch("{% url 'Pugnere:stock_view' %}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    alert(data.error);
+                } else {
+                    console.log('Mise à jour réussie:', data.message);
+                    alert(data.message);
+                    location.reload();  // Recharger la page pour afficher les mises à jour
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+    });
+});
+
+   </script>
+    
+    
+
+</body>
+</html>

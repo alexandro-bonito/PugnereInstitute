@@ -1,0 +1,96 @@
+<div class="facture-header">
+    <h2 style="color: white;">Facture - {{ facture.entreprise.nom }}</h2>
+    <img src="{{ facture.entreprise.logo.url }}" alt="">
+    <p>Date: {{ facture.date_creation }}</p>
+</div>
+
+<h3>Client: {{ facture.client_nom }} {{ facture.client_prenom }}</h3>
+<p>Téléphone: {{ facture.client_telephone }}</p>
+
+<h3>Détails des prestations</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Prix (F)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prestation in facture.prestations.all %}
+        <tr>
+            <td>{{ prestation.description }}</td>
+            <td>{{ prestation.prix }} F</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p class="total">Total: {{ facture.total }} F</p>
+
+
+<style>
+    :root {
+    --poppins: 'Poppins', sans-serif;
+    --blue: #682783;
+    --light: #F9F9F9;
+    --white: #FFFFFF;
+    --grey: #eeeeee;
+}
+
+body {
+    font-family: var(--poppins);
+    background-color: var(--light);
+    margin: 20px;
+    padding: 20px;
+}
+
+h2, h3 {
+    color: var(--blue);
+}
+
+.facture-header {
+    background-color: var(--blue);
+    color: var(--white);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.facture-header img {
+    max-width: 100px;
+    margin: 10px 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.table th, .table td {
+    border: 1px solid var(--grey);
+    padding: 10px;
+    text-align: left;
+}
+
+.table th {
+    background-color: var(--blue);
+    color: var(--white);
+}
+
+.table tr:nth-child(even) {
+    background-color: var(--light);
+}
+
+.table tr:hover {
+    background-color: var(--grey);
+}
+
+.total {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: var(--blue);
+    margin-top: 20px;
+}
+
+</style>

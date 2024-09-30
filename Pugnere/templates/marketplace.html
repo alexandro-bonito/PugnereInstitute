@@ -1,0 +1,214 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace</title>
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --poppins: 'Poppins', sans-serif;
+            --lato: 'Lato', sans-serif;
+            --light: #F9F9F9;
+            --blue: #682783;
+            --light-blue: #CFE8FF;
+            --grey: #eee;
+            --dark-grey: #AAAAAA;
+            --dark: #342E37;
+            --red: #F07F15;
+            --yellow: #FFCE26;
+            --light-yellow: #FFF2C6;
+            --orange: #FD7238;
+            --light-orange: #FFE0D3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--poppins);
+            background-color: var(--light);
+        }
+
+        header {
+            background-color: var(--blue);
+            color: white;
+            padding: 10px;
+            border-radius: 20px;
+            margin: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header .icons {
+            font-size: 24px;
+        }
+
+        .marketplace {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .product {
+            background-color: var(--light-blue);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .product img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product h3 {
+            margin: 15px 0;
+            color: var(--dark);
+        }
+
+        .product p {
+            color: var(--dark-grey);
+            font-size: 14px;
+        }
+
+        .product .btn-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-info {
+            background-color: var(--red);
+            color: white;
+        }
+
+        .btn-cart {
+            background-color: var(--orange);
+            color: white;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+            }
+
+            .icons {
+                font-size: 20px;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                background-color: var(--blue);
+                padding: 10px;
+                text-align: center;
+                width: 98%;
+                justify-content: space-around;
+                margin-bottom: 15px;
+                margin-left: 35px;
+                margin-right: 35px;
+                border-radius: 5px;
+            }
+
+            .icons i {
+                margin: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            {% if user.is_authenticated and user.entreprise %}
+			<div>
+                <img style="width: 80px; height: 80px; border-radius: 50%;"src="{{ user.entreprise.logo.url }}"  alt="Produit 1">
+			</div>
+		{% else %}
+			<img style="width: 50px; height: 50px; border-radius: 50%;" 
+				 src="{% static 'logo.jpg' %}" alt="Logo par défaut" class="logo">
+		{% endif %}	
+        </div>
+        <div class="icons">
+             <!-- 
+            <a style="text-decoration: none; font-size: 18px; color: white;" href=""><i class="fas fa-user"></i></a>
+            <i class="fas fa-kl"><a style="text-decoration: none; font-size: 12px; color: white;" href="">Avis</a></i>
+            <i class="fas fa-kl"><a style="text-decoration: none; font-size: 12px; color: white;" href="#service">Services</a></i>
+            <i class="fas fa-kl"><a style="text-decoration: none; font-size: 12px; color: white;"  href="#produit">Produits</a></i>
+            <a style="text-decoration: none; font-size: 18px; color: white;" href=""> <i class="fas fa-shopping-cart"></i> </a>
+            -->
+
+        </div>
+    </header>
+
+    <section class="marketplace" style="margin-bottom: 150px;">
+
+
+<h3 style="color: var(--blue); font-weight: bold;" id="service">Services</h3>
+
+        {% if services_derives %}
+        {% for service in services_derives %}
+    <div class="product">
+        <img src="{{ service.sderive_image.url }}" alt="Produit 1">
+        <h3>{{ service.nom }}</h3>
+        <p>{{ service.prix }} <span style="color: #682783; font-size: 10px;">-FCFA</span></p>
+        <div class="btn-container">
+            <button class="btn btn-info">+ Infos</button>
+            <button class="btn btn-cart"><i class="fas fa-shopping-cart"></i> Ajouter</button>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+        <p>Aucun service disponible.</p>
+    {% endif %}
+    </div>
+
+    <h3 style="color: var(--blue); font-weight: bold;" id="produit">Produits</h3>
+
+
+        {% if produits %}
+            {% for produit in produits %}
+        <div class="product">
+            <img src="{{ produit.product_image.url }}" alt="Produit 1">
+            <h3>{{ produit.nom }}</h3>
+            <p>{{ produit.prix }} <span style="color: #682783; font-size: 10px;">-FCFA</span></p>
+            <div class="btn-container">
+                <button class="btn btn-info">+ Infos</button>
+                <button class="btn btn-cart"><i class="fas fa-shopping-cart"></i> Ajouter</button>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+            <p>Aucun produit disponible.</p>
+        {% endif %}
+        </div>
+
+        <!-- Ajoutez plus de service ici -->
+    </section>
+</body>
+</html>
